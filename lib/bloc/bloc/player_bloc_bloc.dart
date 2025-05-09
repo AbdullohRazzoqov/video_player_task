@@ -10,6 +10,28 @@ part 'player_bloc_state.dart';
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   PlayerBloc() : super(PlayerBlocInitial()) {
     List<Video> videos = [];
+    final Map<String, CancelToken> _cancelTokens = {};
+    on<CancelDownloadEvent>((event, emit) async {
+      final video = videos[event.index];
+
+      final cancelToken = _cancelTokens[video.id];
+      if (cancelToken != null && !cancelToken.isCancelled) {
+        cancelToken.cancel("Download cancelled");
+      }
+
+      final dir = await getApplicationDocumentsDirectory();
+      final videoDir = Directory('${dir.path}/videos');
+      final tempFile = File('${videoDir.path}/${video.id}.mp4.temp');
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+
+      video.downloadProgress = 0;
+      video.localPath = null;
+      video.isDownloaded = false;
+
+      emit(LoadVideoState(videos: List.from(videos)));
+    });
 
     on<LoadVideosEvent>((event, emit) async {
       List<Video> sampleVideos = [
@@ -64,25 +86,29 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
           await videoDir.create(recursive: true);
         }
 
-        final tempPath = '${videoDir.path}/${videos[event.index].id}.mp4.temp';
-        final finalPath = '${videoDir.path}/${videos[event.index].id}.mp4';
+        final video = videos[event.index];
+        final tempPath = '${videoDir.path}/${video.id}.mp4.temp';
+        final finalPath = '${videoDir.path}/${video.id}.mp4';
         final dio = Dio();
+        final cancelToken = CancelToken();
+
+        _cancelTokens[video.id] = cancelToken;
 
         File tempFile = File(tempPath);
         int startByte = 0;
-
         if (await tempFile.exists()) {
           startByte = await tempFile.length();
         }
 
         await dio.download(
-          videos[event.index].url,
+          video.url,
           tempPath,
           options: Options(
             headers: {
               if (startByte > 0) 'Range': 'bytes=$startByte-',
             },
           ),
+          cancelToken: cancelToken,
           onReceiveProgress: (received, total) {
             if (total != -1) {
               double progress =
@@ -95,10 +121,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
         await tempFile.rename(finalPath);
 
-        videos[event.index].isDownloaded = true;
-        videos[event.index].localPath = finalPath;
+        video.isDownloaded = true;
+        video.localPath = finalPath;
+        _cancelTokens.remove(video.id);
         emit(LoadVideoState(videos: List.from(videos)));
-      } catch (e) {}
+      } catch (e) {
+        // Yuklab olish bekor qilingan bo‘lishi mumkin
+      }
     });
 
     on<DeleteEvent>((event, emit) async {
@@ -139,8 +168,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         int downloadedSize = await tempFile.length();
         return (downloadedSize / totalSize * 100);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return 0.0;
   }
 }

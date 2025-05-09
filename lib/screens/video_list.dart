@@ -55,14 +55,22 @@ class _VideoListState extends State<VideoList> {
                                 },
                               )
                             : (isOnline
-                                ? IconButton(
-                                    icon: Icon(Icons.download),
-                                    onPressed: () {
-                                      context
-                                          .read<PlayerBloc>()
-                                          .add(DownloadEvent(index: index));
-                                    },
-                                  )
+                                ? video.downloadProgress != 0
+                                    ? IconButton(
+                                        icon: Icon(Icons.cancel),
+                                        onPressed: () {
+                                          context.read<PlayerBloc>().add(
+                                              CancelDownloadEvent(index));
+                                        },
+                                      )
+                                    : IconButton(
+                                        icon: Icon(Icons.download),
+                                        onPressed: () {
+                                          context
+                                              .read<PlayerBloc>()
+                                              .add(DownloadEvent(index: index));
+                                        },
+                                      )
                                 : null),
                         onTap: () {
                           Navigator.push(
@@ -74,27 +82,28 @@ class _VideoListState extends State<VideoList> {
                           );
                         },
                       ),
-                         if (video.downloadProgress > 0&&video.downloadProgress<100)
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: LinearProgressIndicator(
-                                value: (video.downloadProgress / 100),
-                                backgroundColor: Colors.grey[400],
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.blue),
+                      if (video.downloadProgress > 0 &&
+                          video.downloadProgress < 100)
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value: (video.downloadProgress / 100),
+                                  backgroundColor: Colors.grey[400],
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.blue),
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              '${(video.downloadProgress).toStringAsFixed(1)}%',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
+                              SizedBox(width: 4),
+                              Text(
+                                '${(video.downloadProgress).toStringAsFixed(1)}%',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 );
