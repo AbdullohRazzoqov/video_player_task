@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_player_task/bloc/bloc/player_bloc_bloc.dart';
 import '../models/video_model.dart';
 
 class VideoPlayScreen extends StatefulWidget {
@@ -232,54 +231,6 @@ class _VideoPlayScreenState extends State<VideoPlayScreen> {
                         top: MediaQuery.sizeOf(context).height * .05),
                     child: CircularProgressIndicator(),
                   ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              (widget.video.isDownloaded && widget.video.localPath != null)
-                  ? IconButton(
-                      onPressed: () {
-                        context
-                            .read<PlayerBloc>()
-                            .add(DeleteEvent(index: widget.index));
-                      },
-                      icon: Icon(Icons.delete))
-                  : IconButton(
-                      onPressed: () {
-                        context
-                            .read<PlayerBloc>()
-                            .add(DownloadEvent(index: widget.index));
-                      },
-                      icon: Icon(Icons.download)),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: BlocBuilder<PlayerBloc, PlayerState>(
-              builder: (context, state) {
-                if (state is LoadVideoState) {
-                  final Video video = state.videos[widget.index];
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: LinearProgressIndicator(
-                          value: (video.downloadProgress / 100),
-                          backgroundColor: Colors.grey[400],
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.blue),
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        '${(video.downloadProgress).toStringAsFixed(1)}%',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  );
-                }
-                return SizedBox();
-              },
-            ),
           ),
         ],
       ),

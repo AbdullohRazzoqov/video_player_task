@@ -22,30 +22,5 @@ class Video {
     this.isDownloading = false,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'url': url,
-      'localPath': localPath,
-      'isDownloaded': isDownloaded,
-      'downloadProgress': downloadProgress,
-      'downloadedBytes': downloadedBytes,
-      'totalBytes': totalBytes,
-      'isDownloading': isDownloading,
-    };
-  }
-
-  factory Video.fromJson(Map<String, dynamic> json) {
-    return Video(
-      title: '',
-      id: json['id'],
-      url: json['url'],
-      localPath: json['localPath'],
-      isDownloaded: json['isDownloaded'] ?? false,
-      downloadProgress: json['downloadProgress'] ?? 0.0,
-      downloadedBytes: json['downloadedBytes'] ?? 0,
-      totalBytes: json['totalBytes'] ?? 0,
-      isDownloading: json['isDownloading'] ?? false,
-    );
-  }
+ 
 }

@@ -14,3 +14,15 @@ final class DeleteEvent extends PlayerEvent {
   final int index;
   DeleteEvent({required this.index});
 }
+
+class PauseDownloadEvent extends PlayerEvent {
+  final int index;
+
+  PauseDownloadEvent(this.index);
+}
+
+class CancelDownloadEvent extends PlayerEvent {
+  final int index;
+
+  CancelDownloadEvent(this.index);
+}

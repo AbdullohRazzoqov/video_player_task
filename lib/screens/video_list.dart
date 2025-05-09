@@ -74,7 +74,7 @@ class _VideoListState extends State<VideoList> {
                           );
                         },
                       ),
-                      //   if (video.isDownloadedLoading)
+                         if (video.downloadProgress > 0&&video.downloadProgress<100)
                       Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Row(
